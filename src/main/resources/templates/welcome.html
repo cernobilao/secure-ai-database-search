@@ -2,15 +2,29 @@
 
 <html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'home')}">
 
-  <body>
+<body>
 
-    <h2 th:text="#{welcome}">Welcome</h2>
-    <div class="row">
-        <div class="col-md-12">
-          <img class="img-responsive" src="../static/resources/images/pets.png" th:src="@{/resources/images/pets.png}"/>
-        </div>
-    </div>
+<h2 th:text="#{welcome}">Welcome</h2>
 
-  </body>
+<div class="row">
+  <div class="col-md-12">
+    <p>
+      This is a demo application showcasing a search over a relational database using natural language. The search is
+      secured, ensuring users cannot query data to which they have no access. If you log in as an owner, you can see
+      only your pet.</p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <img class="img-responsive mx-auto d-block" src="../static/resources/images/pets.png"
+         th:src="@{/resources/images/pets.png}"/>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12 text-center">
+    <a href="/nl-search" class="btn btn-primary">Let's start</a>
+  </div>
+</div>
+</body>
 
 </html>

@@ -50,6 +50,11 @@
             <span>Home</span>
           </li>
 
+          <li th:replace="~{::menuItem ('/nl-search/find','nl-Search','nl search','search','NL Search')}">
+            <span class="fa fa-search" aria-hidden="true"></span>
+            <span>NL search</span>
+          </li>
+
           <li th:replace="~{::menuItem ('/owners/find','owners','find owners','search','Find owners')}">
             <span class="fa fa-search" aria-hidden="true"></span>
             <span>Find owners</span>
@@ -66,6 +71,15 @@
             <span>Error</span>
           </li>
 
+          <li sec:authorize="!isAuthenticated()" th:replace="~{::menuItem ('/login-owner','login','login page','sign-in','Login')}">
+            <span class="fa fa-sign-in" aria-hidden="true"></span>
+            <span>Login as Owner</span>
+          </li>
+
+          <li sec:authorize="isAuthenticated()" th:replace="~{::menuItem ('/logout','logout','logout page','sign-out','Logout')}">
+            <span class="fa fa-sign-out" aria-hidden="true"></span>
+            <span>Logout</span>
+          </li>
         </ul>
       </div>
     </div>

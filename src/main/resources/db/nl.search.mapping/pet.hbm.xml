@@ -1,0 +1,29 @@
+<hibernate-mapping>
+	<class name="org.springframework.samples.petclinic.owner.Pet" table="pets"
+		subselect="SELECT * FROM pets WHERE owner_id = '{{ownerId}}'">
+		<id name="id" type="java.lang.Long">
+			<column name="id"/>
+			<generator class="native"/>
+		</id>
+
+		<property name="name" type="java.lang.String">
+			<column name="name"/>
+		</property>
+
+		<property name="birthDate" type="java.time.LocalDate">
+			<column name="birth_date"/>
+		</property>
+
+		<many-to-one name="type" class="org.springframework.samples.petclinic.owner.PetType" fetch="select">
+			<column name="type_id" not-null="true"/>
+		</many-to-one>
+
+		<set name="visits" table="visits" inverse="true" lazy="false" fetch="select"
+			cascade="all" order-by="visit_date asc" access="field">
+			<key>
+				<column name="pet_id" not-null="true" />
+			</key>
+			<one-to-many class="org.springframework.samples.petclinic.owner.Visit" />
+		</set>
+	</class>
+</hibernate-mapping>

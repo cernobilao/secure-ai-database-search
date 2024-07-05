@@ -1,0 +1,31 @@
+<html xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{fragments/layout :: layout (~{::body},'nl-search')}">
+
+<body>
+
+  <h2>Natural Language Search</h2>
+
+  <form th:object="${nlSearch}" th:action="@{/nl-search}" method="get"
+    class="form-horizontal" id="nl-search-form">
+    <div class="form-group">
+      <div class="control-group" id="queryGroup">
+        <label class="col-sm-6 control-label">What do you want to retrieve from the database? </label>
+        <div class="col-sm-10">
+          <input class="form-control" th:field="*{userQuery}" size="30"
+            maxlength="80" /> <span class="help-inline"><div
+              th:if="${#fields.hasAnyErrors()}">
+              <p th:each="err : ${#fields.allErrors()}" th:text="${err}">Error</p>
+            </div></span>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-primary">Find</button>
+      </div>
+    </div>
+
+  </form>
+
+</body>
+</html>
