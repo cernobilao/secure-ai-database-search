@@ -29,17 +29,14 @@ public class NlSearchController {
 	}
 
 	@GetMapping("/nl-search")
-	public String processNlSearchForm(@RequestParam(defaultValue = "1") int page, NlSearch nlSearch,
-		Model model) {
+	public String processNlSearchForm(@RequestParam(defaultValue = "1") int page, NlSearch nlSearch, Model model) {
+		nlSearch = nlSearchWithHibernate.getResults(nlSearch);
 
-		try {
-			nlSearch = nlSearchWithHibernate.getResults(nlSearch);
-		} catch (RuntimeException e) {
-			nlSearch.setErrorMessage(e.getMessage());
+		if (nlSearch.getErrorMessage() == null) {
+			List<String> columnNamesFromHql = getColumnNamesFromHql(nlSearch.getAiResponse());
+			nlSearch.setColumnNames(columnNamesFromHql);
 		}
 
-		List<String> columnNamesFromHql = getColumnNamesFromHql(nlSearch.getAiResponse());
-		nlSearch.setColumnNames(columnNamesFromHql);
 		return addPaginationModel(page, model);
 	}
 

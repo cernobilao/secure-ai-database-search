@@ -1,4 +1,4 @@
-# Natural Language Search Sample Application [![Build Status](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml)
+# Secure AI Database Search Sample Application [![Build Status](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml)
 
 This is a fork of the Spring Petclinic that has been modified to demonstrate secured database search with natural
 language. It uses AI assistant to translate natural language queries into Hibernate queries. The access to the database

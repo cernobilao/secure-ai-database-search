@@ -28,7 +28,10 @@
 <div style="color: lightgreen;">
   <strong>NL Search Assistant: [[${nlSearch.aiResponse}]]</strong>
 </div>
-<table id="nlSearchResult" class="table table-striped">
+<div th:if="${nlSearch.errorMessage}" style="color: red;">
+  <strong>Error: [[${nlSearch.errorMessage}]]</strong>
+</div>
+<table id="nlSearchResult" class="table table-striped" th:unless="${nlSearch.errorMessage}">
   <thead>
   <tr>
     <th th:each="columnName : ${nlSearch.columnNames}" th:text="${columnName}"/>

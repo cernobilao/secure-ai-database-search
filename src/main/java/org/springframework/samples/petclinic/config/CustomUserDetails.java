@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class CustomUserDetails  implements UserDetails {
+public class CustomUserDetails implements UserDetails {
 
 	public CustomUserDetails(final UserDetails user) {
 		this.userDetails = user;
@@ -31,4 +31,5 @@ public class CustomUserDetails  implements UserDetails {
 	public String getId() {
 		return "1";
 	}
+
 }

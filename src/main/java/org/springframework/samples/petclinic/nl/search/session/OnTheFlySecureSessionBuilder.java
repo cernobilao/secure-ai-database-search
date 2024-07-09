@@ -19,9 +19,7 @@ public class OnTheFlySecureSessionBuilder {
 	private EntityManager entityManager;
 
 	public Session getSession() {
-		Configuration configuration =  MappingConfigurationBuilder
-			.getBuilderByLoggedUser()
-			.build();
+		Configuration configuration = MappingConfigurationBuilder.getBuilderByLoggedUser().build();
 		configuration.setProperties(getPropertiesUsingCurrentEntityManager());
 
 		SessionFactory customSessionFactory = configuration.buildSessionFactory();

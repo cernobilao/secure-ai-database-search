@@ -23,21 +23,23 @@ public class LoginController {
 	@GetMapping("/login-owner")
 	public String loginOwner(HttpServletRequest request) {
 		try {
-			UsernamePasswordAuthenticationToken authToken =
-				new UsernamePasswordAuthenticationToken(WebSecurityConfig.USER_NAME, WebSecurityConfig.PASSWORD);
+			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+					WebSecurityConfig.USER_NAME, WebSecurityConfig.PASSWORD);
 			Authentication authentication = authenticationManager.authenticate(authToken);
 			if (authentication.isAuthenticated()) {
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 				HttpSession session = request.getSession(true);
 				session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-					SecurityContextHolder.getContext());
+						SecurityContextHolder.getContext());
 
 				return "redirect:/nl-search";
 			}
-		} catch (AuthenticationException e) {
+		}
+		catch (AuthenticationException e) {
 			return "redirect:/oups";
 		}
 
 		return "redirect:/oups";
 	}
+
 }

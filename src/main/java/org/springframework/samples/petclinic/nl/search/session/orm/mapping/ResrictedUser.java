@@ -27,8 +27,7 @@ class ResrictedUser extends MappingConfigurationBuilder {
 	public Configuration build() {
 		String petMapping = PET_ORM_MAPPING_XML.replace("{{ownerId}}", String.valueOf(principal.getId()));
 		InputStream petMappingInputStream = new ByteArrayInputStream(petMapping.getBytes(StandardCharsets.UTF_8));
-		Configuration configuration = new Configuration()
-			.addInputStream(petMappingInputStream)
+		Configuration configuration = new Configuration().addInputStream(petMappingInputStream)
 			.addAnnotatedClass(Visit.class)
 			.addAnnotatedClass(PetType.class)
 			.addAnnotatedClass(Owner.class);
@@ -42,11 +41,13 @@ class ResrictedUser extends MappingConfigurationBuilder {
 			}
 
 			try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+					new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 				return reader.lines().collect(Collectors.joining(System.lineSeparator()));
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException("Error reading resource file: " + fileName, e);
 		}
 	}
+
 }

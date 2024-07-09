@@ -16,4 +16,5 @@ public class CustomUserDetailsService implements UserDetailsService {
 	public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		return customUser;
 	}
+
 }

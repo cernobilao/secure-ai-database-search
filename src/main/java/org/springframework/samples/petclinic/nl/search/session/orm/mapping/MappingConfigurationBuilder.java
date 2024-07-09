@@ -15,8 +15,10 @@ public abstract class MappingConfigurationBuilder {
 		if (auth.getPrincipal().getClass().equals(CustomUserDetails.class)) {
 			CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
 			return new ResrictedUser(principal);
-		} else {
+		}
+		else {
 			return new AdminUser();
 		}
 	}
+
 }
