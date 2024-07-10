@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Properties;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,10 +45,22 @@ public class AssistantAIClient {
 		return response.body();
 	}
 
-	public AssistantResponseDTO createAssistant(String initialPrompt) throws Exception {
-		AssistantRequestDTO dto = new AssistantRequestDTO(GPT3_5_TURBO.getName(), initialPrompt);
+	public AssistantResponseDTO createAssistant(String name, String initialPrompt) throws Exception {
+		AssistantRequestDTO dto = new AssistantRequestDTO(name, GPT3_5_TURBO.getName(), initialPrompt);
 		String response = post(assistantsUrl, dto);
 		return objectMapper.readValue(response, AssistantResponseDTO.class);
+	}
+
+	public List<AssistantResponseDTO> listAssistants() throws Exception {
+		String url = "https://api.openai.com/v1/assistants?order=desc&limit=20";
+		HttpRequest request = getRequestWithHeaders(url).GET().build();
+		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+		// Assuming AssistantListResponseDTO is a class that matches the JSON structure of
+		// the response
+		AssistantListResponseDTO assistantsList = objectMapper.readValue(response.body(),
+				AssistantListResponseDTO.class);
+		return assistantsList.data();
 	}
 
 	public ThreadResponseDTO createThread() throws Exception {

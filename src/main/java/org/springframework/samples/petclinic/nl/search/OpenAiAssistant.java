@@ -2,23 +2,26 @@ package org.springframework.samples.petclinic.nl.search;
 
 import static java.lang.Thread.sleep;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.samples.petclinic.nl.search.exception.AiAssistantConnectionException;
 import org.springframework.samples.petclinic.nl.search.openaiclient.AssistantAIClient;
+import org.springframework.samples.petclinic.nl.search.openaiclient.dto.AssistantResponseDTO;
 import org.springframework.samples.petclinic.nl.search.openaiclient.dto.MessageResponseDTO;
 import org.springframework.samples.petclinic.nl.search.openaiclient.dto.MessagesListResponseDTO;
 import org.springframework.samples.petclinic.nl.search.openaiclient.dto.RunResponseDTO;
 import org.springframework.samples.petclinic.nl.search.openaiclient.dto.ThreadResponseDTO;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 @Component
 public class OpenAiAssistant implements AiAssistant {
 
-	@Value("${openai.assistantId}")
 	private String assistantId;
 
 	long DELAY = 3;
@@ -34,6 +37,31 @@ public class OpenAiAssistant implements AiAssistant {
 		properties.setProperty("openai.assistants.url", assistantsUrl);
 		properties.setProperty("openai.threads.url", threadsUrl);
 		this.client = new AssistantAIClient(properties);
+		String assistantId = createAssistantIfDoesNotExist();
+		this.assistantId = assistantId;
+	}
+
+	private String createAssistantIfDoesNotExist() {
+		try {
+			Optional<AssistantResponseDTO> existingAssistant = client.listAssistants()
+				.stream()
+				.filter(assistant -> "User Query to HQL Translator".equals(assistant.name()))
+				.findFirst();
+			if (existingAssistant.isPresent()) {
+				System.out.println("Found existing assistant with id " + assistantId);
+				return existingAssistant.get().id();
+			}
+			else {
+				ClassPathResource resource = new ClassPathResource("nl.search/openai-assistant-instructions.txt");
+				String instructions = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+				AssistantResponseDTO assistantResponseDTO = client.createAssistant("NL database search", instructions);
+				System.out.println("Created new assistant with id " + assistantId);
+				return assistantResponseDTO.id();
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -42,7 +70,6 @@ public class OpenAiAssistant implements AiAssistant {
 			throw new AiAssistantConnectionException("Assistant ID is not set");
 		}
 		ThreadResponseDTO thread = client.createThread();
-		;
 		if (thread.id() == null) {
 			throw new AiAssistantConnectionException("Failed to create thread");
 		}
@@ -52,7 +79,8 @@ public class OpenAiAssistant implements AiAssistant {
 		waitUntilRunIsFinished(client, thread, run, DELAY);
 
 		MessagesListResponseDTO allResponses = client.getMessages(thread.id());
-		System.out.println("These are all the messages and you will be billed by OpenAI for every single one of them:");
+		System.out
+			.println("These are all the messages and you will be billed by OpenAI for every single one of " + "them:");
 		log(allResponses);
 		MessageResponseDTO assistantMessage = allResponses.data()
 			.stream()
