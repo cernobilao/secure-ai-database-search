@@ -29,10 +29,8 @@ public class WebSecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll())
 			.formLogin((form) -> form.permitAll())
-			.logout((logout) -> logout.logoutSuccessUrl("/nl-search"));
-
+			.logout((logout) -> logout.logoutSuccessUrl("/nl-search/find"));
 		return http.build();
-
 	}
 
 	@Bean

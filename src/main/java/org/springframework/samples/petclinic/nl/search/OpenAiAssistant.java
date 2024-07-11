@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.samples.petclinic.nl.search.exception.AiAssistantConnectionException;
@@ -22,7 +24,9 @@ import org.springframework.util.StreamUtils;
 @Component
 public class OpenAiAssistant implements AiAssistant {
 
-	private String assistantId;
+	private static Logger logger = LoggerFactory.getLogger(OpenAiAssistant.class);
+
+	private static String assistantId;
 
 	long DELAY = 3;
 
@@ -41,6 +45,13 @@ public class OpenAiAssistant implements AiAssistant {
 		this.assistantId = assistantId;
 	}
 
+	public static Boolean isOk() {
+		if (assistantId == null || assistantId.isEmpty()) {
+			return false;
+		}
+		return true;
+	}
+
 	private String createAssistantIfDoesNotExist() {
 		try {
 			Optional<AssistantResponseDTO> existingAssistant = client.listAssistants()
@@ -48,29 +59,34 @@ public class OpenAiAssistant implements AiAssistant {
 				.filter(assistant -> "User Query to HQL Translator".equals(assistant.name()))
 				.findFirst();
 			if (existingAssistant.isPresent()) {
-				System.out.println("Found existing assistant with id " + assistantId);
+				logger.info("Found existing assistant with id " + assistantId);
 				return existingAssistant.get().id();
 			}
 			else {
 				ClassPathResource resource = new ClassPathResource("nl.search/openai-assistant-instructions.txt");
 				String instructions = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 				AssistantResponseDTO assistantResponseDTO = client.createAssistant("NL database search", instructions);
-				System.out.println("Created new assistant with id " + assistantId);
+				logger.info("Created new assistant with id " + assistantId);
 				return assistantResponseDTO.id();
 			}
 		}
 		catch (Exception e) {
-			throw new RuntimeException(e);
+			logger.warn(
+					"Failed to create Open AI Assistant. Make sure that the API key is set in application.properties.",
+					e);
+			return null;
 		}
 	}
 
 	@Override
 	public String getHql(String userInput) throws Exception {
-		if (assistantId == null || assistantId.isEmpty()) {
-			throw new AiAssistantConnectionException("Assistant ID is not set");
+		if (!isOk()) {
+			logger.info("OpenAI Assistant is available.");
+			return "SELECT p.name, p.birthDate, p.type FROM Pet p";
 		}
 		ThreadResponseDTO thread = client.createThread();
 		if (thread.id() == null) {
+			logger.error("Failed to create thread");
 			throw new AiAssistantConnectionException("Failed to create thread");
 		}
 		client.sendMessage(thread.id(), "user", userInput);
@@ -79,8 +95,7 @@ public class OpenAiAssistant implements AiAssistant {
 		waitUntilRunIsFinished(client, thread, run, DELAY);
 
 		MessagesListResponseDTO allResponses = client.getMessages(thread.id());
-		System.out
-			.println("These are all the messages and you will be billed by OpenAI for every single one of " + "them:");
+		logger.info("These are all the messages and you will be billed by OpenAI for every single one of them:");
 		log(allResponses);
 		MessageResponseDTO assistantMessage = allResponses.data()
 			.stream()
@@ -100,7 +115,7 @@ public class OpenAiAssistant implements AiAssistant {
 
 	private static void superviseWorkInProgress(AssistantAIClient client, ThreadResponseDTO thread) {
 		try {
-			System.out.println("Checking messages to supervise assistant's work");
+			logger.info("Checking messages to supervise assistant's work");
 			MessagesListResponseDTO messages = client.getMessages(thread.id());
 			log(messages);
 		}
@@ -110,18 +125,18 @@ public class OpenAiAssistant implements AiAssistant {
 	}
 
 	private static void log(MessagesListResponseDTO messages) {
-		messages.data().forEach(System.out::println);
+		messages.data().forEach(message -> logger.info(message.toString()));
 	}
 
 	private static boolean isRunDone(AssistantAIClient client, String threadId, String runId) {
 		RunResponseDTO status;
 		try {
 			status = client.getRunStatus(threadId, runId);
-			System.out.println("Status of your run is currently " + status);
+			logger.info("Status of your run is currently " + status);
 			return isRunStateFinal(status);
 		}
 		catch (Exception e) {
-			System.err.println("Failed to get run state, will retry..." + e);
+			logger.error("Failed to get run state, will retry...", e);
 			e.printStackTrace();
 			return false;
 		}

@@ -4,6 +4,8 @@ This is a fork of the Spring Petclinic that has been modified to demonstrate sec
 language. It uses AI assistant to translate natural language queries into Hibernate queries. The access to the database
 is controlled on the hibernate session level so the users can only access the data that they are allowed to see.
 
+The application uses OpenAI Assistants API to translate queries into HQL.
+
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/spring-projects/spring-petclinic) [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=7517918)
 
 ## Understanding the Spring Petclinic application with a few diagrams

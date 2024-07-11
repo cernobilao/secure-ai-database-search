@@ -4,6 +4,10 @@ import java.util.List;
 
 public class NlSearch {
 
+	String assistantInfoMessage;
+
+	String loggedInUserInfoMessage;
+
 	String userQuery;
 
 	List<Object[]> searchResult;
@@ -52,6 +56,22 @@ public class NlSearch {
 
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
+	}
+
+	public String getAssistantInfoMessage() {
+		return assistantInfoMessage;
+	}
+
+	public void setAssistantInfoMessage(String assistantInfoMessage) {
+		this.assistantInfoMessage = assistantInfoMessage;
+	}
+
+	public String getLoggedInUserInfoMessage() {
+		return loggedInUserInfoMessage;
+	}
+
+	public void setLoggedInUserInfoMessage(String loggedInUserInfoMessage) {
+		this.loggedInUserInfoMessage = loggedInUserInfoMessage;
 	}
 
 }

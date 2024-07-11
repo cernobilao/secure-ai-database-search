@@ -2,7 +2,13 @@
   th:replace="~{fragments/layout :: layout (~{::body},'nl-search')}">
 
 <body>
-
+  <div th:if="${nlSearch.assistantInfoMessage}" style="background-color: #FFFFE0; text-align: center; margin: 10px;">
+    <strong><i class="fas fa-info-circle"></i> Info: [[${nlSearch.assistantInfoMessage}]]</strong>
+  </div>
+  <div th:if="${nlSearch.loggedInUserInfoMessage}"
+       style="background-color: #FFFFE0; text-align: center; margin: 10px;">
+    <strong><i class="fas fa-info-circle"></i> Info: [[${nlSearch.loggedInUserInfoMessage}]]</strong>
+  </div>
   <h2>Natural Language Search</h2>
 
   <form th:object="${nlSearch}" th:action="@{/nl-search}" method="get"
