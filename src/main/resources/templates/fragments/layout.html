@@ -71,7 +71,7 @@
             <span>Error</span>
           </li>
 
-          <li sec:authorize="!isAuthenticated()" th:replace="~{::menuItem ('/login-owner','login','login page','sign-in','Login')}">
+          <li sec:authorize="!isAuthenticated()" th:replace="~{::menuItem ('/login-owner','login','login page','sign-in','Login as Owner')}">
             <span class="fa fa-sign-in" aria-hidden="true"></span>
             <span>Login as Owner</span>
           </li>
