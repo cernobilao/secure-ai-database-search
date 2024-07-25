@@ -49,7 +49,7 @@ public class AssistantAIClient {
 	}
 
 	public AssistantResponseDTO createAssistant(String name, String initialPrompt) throws Exception {
-		AssistantRequestDTO dto = new AssistantRequestDTO(name, GPT3_5_TURBO.getName(), initialPrompt);
+		AssistantRequestDTO dto = new AssistantRequestDTO(name, GPT_4O_MINI.getName(), initialPrompt);
 		String response = post(assistantsUrl, dto);
 		return objectMapper.readValue(response, AssistantResponseDTO.class);
 	}
@@ -110,7 +110,7 @@ public class AssistantAIClient {
 		return HttpRequest.newBuilder()
 			.uri(URI.create(url))
 			.header("Authorization", "Bearer " + apiKey)
-			.header("OpenAI-Beta", "assistants=v1")
+			.header("OpenAI-Beta", "assistants=v2")
 			.header("Content-Type", "application/json");
 	}
 

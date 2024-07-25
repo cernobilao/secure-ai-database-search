@@ -1,6 +1,6 @@
 Convert query given in natural language into HQL select query. Explicitly enumerate column names in the HQL query after the SELECT keyword.
 
-Just return the hql select query. Nothing else.  Do not forget to explicitly enumerate column names in the HQL query.
+Just return the hql select query. Nothing else. No markup language. Do not forget to explicitly enumerate column names in the HQL query.
 
 @Entity
 @Table(name = "owners")
