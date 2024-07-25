@@ -1,7 +1,9 @@
 package org.springframework.samples.petclinic.nl.search.openaiclient;
 
 import static org.springframework.samples.petclinic.nl.search.openaiclient.model.GPTModel.GPT3_5_TURBO;
+import static org.springframework.samples.petclinic.nl.search.openaiclient.model.GPTModel.GPT_4O_MINI;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,6 +14,7 @@ import java.util.Properties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.samples.petclinic.nl.search.openaiclient.dto.*;
+import org.springframework.samples.petclinic.nl.search.openaiclient.model.ListAssistantsParams;
 
 public class AssistantAIClient {
 
@@ -52,12 +55,22 @@ public class AssistantAIClient {
 	}
 
 	public List<AssistantResponseDTO> listAssistants() throws Exception {
-		String url = "https://api.openai.com/v1/assistants?order=desc&limit=20";
+		return listAssistants(assistantsUrl);
+	}
+
+	public List<AssistantResponseDTO> listAssistants(ListAssistantsParams listAssistantsParams) throws Exception {
+		StringBuilder urlBuilder = new StringBuilder(assistantsUrl).append("?");
+		listAssistantsParams.order().ifPresent(order -> urlBuilder.append("order=").append(order).append("&"));
+		listAssistantsParams.limit().ifPresent(limit -> urlBuilder.append("limit=").append(limit).append("&"));
+		listAssistantsParams.after().ifPresent(after -> urlBuilder.append("after=").append(after).append("&"));
+		listAssistantsParams.before().ifPresent(before -> urlBuilder.append("before=").append(before));
+		String url = urlBuilder.toString();
+		return listAssistants(url);
+	}
+
+	private List<AssistantResponseDTO> listAssistants(String url) throws IOException, InterruptedException {
 		HttpRequest request = getRequestWithHeaders(url).GET().build();
 		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-		// Assuming AssistantListResponseDTO is a class that matches the JSON structure of
-		// the response
 		AssistantListResponseDTO assistantsList = objectMapper.readValue(response.body(),
 				AssistantListResponseDTO.class);
 		return assistantsList.data();

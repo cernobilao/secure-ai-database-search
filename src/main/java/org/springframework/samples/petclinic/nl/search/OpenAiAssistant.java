@@ -24,6 +24,8 @@ import org.springframework.util.StreamUtils;
 @Component
 public class OpenAiAssistant implements AiAssistant {
 
+	public static final String ASSISTANT_NAME = "User Query to HQL Translator";
+
 	private static Logger logger = LoggerFactory.getLogger(OpenAiAssistant.class);
 
 	private static String assistantId;
@@ -56,7 +58,7 @@ public class OpenAiAssistant implements AiAssistant {
 		try {
 			Optional<AssistantResponseDTO> existingAssistant = client.listAssistants()
 				.stream()
-				.filter(assistant -> "User Query to HQL Translator".equals(assistant.name()))
+				.filter(assistant -> ASSISTANT_NAME.equals(assistant.name()))
 				.findFirst();
 			if (existingAssistant.isPresent()) {
 				logger.info("Found existing assistant with id " + assistantId);
@@ -65,7 +67,7 @@ public class OpenAiAssistant implements AiAssistant {
 			else {
 				ClassPathResource resource = new ClassPathResource("nl.search/openai-assistant-instructions.txt");
 				String instructions = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
-				AssistantResponseDTO assistantResponseDTO = client.createAssistant("NL database search", instructions);
+				AssistantResponseDTO assistantResponseDTO = client.createAssistant(ASSISTANT_NAME, instructions);
 				logger.info("Created new assistant with id " + assistantId);
 				return assistantResponseDTO.id();
 			}
