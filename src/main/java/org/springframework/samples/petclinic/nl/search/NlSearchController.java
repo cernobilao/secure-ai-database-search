@@ -14,8 +14,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 @Controller
+@SessionAttributes("nlSearch")
 public class NlSearchController {
 
 	@Autowired
@@ -43,19 +46,36 @@ public class NlSearchController {
 	}
 
 	@GetMapping("/nl-search/find")
-	public String initNlSearchForm() {
+	public String initNlSearchForm(SessionStatus sessionStatus) {
+		sessionStatus.setComplete();
 		return "nl.search/nlSearch";
 	}
 
 	@GetMapping("/nl-search")
 	public String processNlSearchForm(@RequestParam(defaultValue = "1") int page, NlSearch nlSearch, Model model) {
-		nlSearch = nlSearchWithHibernate.getResults(nlSearch);
+		processNlSearchForm(nlSearch);
+		return addPaginationModel(page, model);
+	}
 
+	@GetMapping("/nl-search/fix-error")
+	public String processNlSearchFormToFixError(@RequestParam(defaultValue = "1") int page, NlSearch nlSearch,
+			Model model) {
+		String userQueryFiledOriginalValue = nlSearch.getUserQuery();
+		nlSearch
+			.setUserQuery("Please look at the database schema again and fix this error: " + nlSearch.getErrorMessage());
+		nlSearch = processNlSearchForm(nlSearch);
+		nlSearch.setUserQuery(userQueryFiledOriginalValue);
+		return addPaginationModel(page, model);
+	}
+
+	private NlSearch processNlSearchForm(NlSearch nlSearch) {
+		nlSearch.setErrorMessage(null);
+		nlSearch = nlSearchWithHibernate.getResults(nlSearch);
 		if (nlSearch.getErrorMessage() == null) {
 			List<String> columnNamesFromHql = getColumnNamesFromHql(nlSearch.getAiResponse());
 			nlSearch.setColumnNames(columnNamesFromHql);
 		}
-		return addPaginationModel(page, model);
+		return nlSearch;
 	}
 
 	private String addPaginationModel(int page, Model model) {

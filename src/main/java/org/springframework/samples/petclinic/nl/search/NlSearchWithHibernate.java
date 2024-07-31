@@ -19,7 +19,13 @@ public class NlSearchWithHibernate {
 	public NlSearch getResults(NlSearch nlSearch) {
 		String hqlFromAssistant = null;
 		try {
-			hqlFromAssistant = aiAssistant.getHql(nlSearch.getUserQuery());
+			nlSearch.getConversationHistory().add(nlSearch.getUserQuery());
+			if (nlSearch.getThreadId() == null) {
+				String threadId = aiAssistant.createThread();
+				nlSearch.setThreadId(threadId);
+			}
+			hqlFromAssistant = aiAssistant.getHql(nlSearch.getUserQuery(), nlSearch.getThreadId());
+
 		}
 		catch (AiAssistantConnectionException e) {
 			nlSearch.setErrorMessage(
@@ -32,6 +38,7 @@ public class NlSearchWithHibernate {
 			return nlSearch;
 		}
 
+		nlSearch.getConversationHistory().add(hqlFromAssistant);
 		nlSearch.setAiResponse(hqlFromAssistant);
 
 		try {

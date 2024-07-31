@@ -12,7 +12,11 @@ The application uses OpenAI Assistants API to translate queries into HQL.
 
 [See the presentation here](https://speakerdeck.com/michaelisvy/spring-petclinic-sample-application)
 
-## Run Petclinic locally
+## Run Secure AI Database Search locally
+
+The steps to run the application are the same as for the original Spring Petclinic application described below.
+The only difference is that you need to set the `openai.api.key` property in the `application.properties` file.
+If you don't have an OpenAI account, you can still run the app, but only the database security function will be demonstrated.
 
 Spring Petclinic is a [Spring Boot](https://spring.io/guides/gs/spring-boot) application built
 using [Maven](https://spring.io/guides/gs/maven/) or [Gradle](https://spring.io/guides/gs/gradle/). You can build a jar

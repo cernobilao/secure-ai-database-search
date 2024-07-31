@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.nl.search;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NlSearch {
@@ -17,6 +18,10 @@ public class NlSearch {
 	List<String> columnNames;
 
 	String errorMessage;
+
+	String threadId;
+
+	List<String> conversationHistory = new ArrayList<>();
 
 	public String getUserQuery() {
 		return userQuery;
@@ -72,6 +77,22 @@ public class NlSearch {
 
 	public void setLoggedInUserInfoMessage(String loggedInUserInfoMessage) {
 		this.loggedInUserInfoMessage = loggedInUserInfoMessage;
+	}
+
+	public String getThreadId() {
+		return threadId;
+	}
+
+	public void setThreadId(String threadId) {
+		this.threadId = threadId;
+	}
+
+	public List<String> getConversationHistory() {
+		return conversationHistory;
+	}
+
+	public void setConversationHistory(List<String> conversationHistory) {
+		this.conversationHistory = conversationHistory;
 	}
 
 }

@@ -16,9 +16,9 @@
     <div class="form-group">
       <div class="control-group" id="queryGroup">
         <label class="col-sm-6 control-label">What do you want to retrieve from the database? </label>
-        <div class="col-sm-10">
+        <div>
           <input class="form-control" th:field="*{userQuery}" size="30"
-            maxlength="80" /> <span class="help-inline"><div
+            maxlength="2000" /> <span class="help-inline"><div
               th:if="${#fields.hasAnyErrors()}">
               <p th:each="err : ${#fields.allErrors()}" th:text="${err}">Error</p>
             </div></span>

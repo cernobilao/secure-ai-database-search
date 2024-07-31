@@ -81,6 +81,14 @@ public class OpenAiAssistant implements AiAssistant {
 	}
 
 	@Override
+	public String getHql(String userInput, String threadId) throws Exception {
+		if (threadId == null || threadId.isEmpty()) {
+			return getHql(userInput);
+		}
+		return getNewHqlFromConversationThread(userInput, threadId);
+	}
+
+	@Override
 	public String getHql(String userInput) throws Exception {
 		if (!isOk()) {
 			logger.info("OpenAI Assistant is available.");
@@ -91,12 +99,26 @@ public class OpenAiAssistant implements AiAssistant {
 			logger.error("Failed to create thread");
 			throw new AiAssistantConnectionException("Failed to create thread");
 		}
-		client.sendMessage(thread.id(), "user", userInput);
-		RunResponseDTO run = client.runMessage(thread.id(), assistantId);
+		return getNewHqlFromConversationThread(userInput, thread.id());
+	}
 
-		waitUntilRunIsFinished(client, thread, run, DELAY);
+	@Override
+	public String createThread() throws Exception {
+		ThreadResponseDTO thread = client.createThread();
+		if (thread.id() == null) {
+			logger.error("Failed to create thread");
+			throw new AiAssistantConnectionException("Failed to create thread");
+		}
+		return thread.id();
+	}
 
-		MessagesListResponseDTO allResponses = client.getMessages(thread.id());
+	private String getNewHqlFromConversationThread(String userInput, String threadId) throws Exception {
+		client.sendMessage(threadId, "user", userInput);
+		RunResponseDTO run = client.runMessage(threadId, assistantId);
+
+		waitUntilRunIsFinished(client, threadId, run, DELAY);
+
+		MessagesListResponseDTO allResponses = client.getMessages(threadId);
 		logger.info("These are all the messages and you will be billed by OpenAI for every single one of them:");
 		log(allResponses);
 		MessageResponseDTO assistantMessage = allResponses.data()
@@ -107,18 +129,18 @@ public class OpenAiAssistant implements AiAssistant {
 		return assistantMessage.content().get(0).text().value();
 	}
 
-	private static void waitUntilRunIsFinished(AssistantAIClient client, ThreadResponseDTO thread, RunResponseDTO run,
+	private static void waitUntilRunIsFinished(AssistantAIClient client, String threadId, RunResponseDTO run,
 			long DELAY) throws InterruptedException {
-		while (!isRunDone(client, thread.id(), run.id())) {
-			superviseWorkInProgress(client, thread);
+		while (!isRunDone(client, threadId, run.id())) {
+			superviseWorkInProgress(client, threadId);
 			sleep(DELAY * 1000);
 		}
 	}
 
-	private static void superviseWorkInProgress(AssistantAIClient client, ThreadResponseDTO thread) {
+	private static void superviseWorkInProgress(AssistantAIClient client, String threadId) {
 		try {
 			logger.info("Checking messages to supervise assistant's work");
-			MessagesListResponseDTO messages = client.getMessages(thread.id());
+			MessagesListResponseDTO messages = client.getMessages(threadId);
 			log(messages);
 		}
 		catch (Exception e) {
