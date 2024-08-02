@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.aot.DisabledInAotMode;
@@ -40,6 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(VisitController.class)
 @DisabledInNativeImage
 @DisabledInAotMode
+@AutoConfigureMockMvc(addFilters = false)
 class VisitControllerTests {
 
 	private static final int TEST_OWNER_ID = 1;
