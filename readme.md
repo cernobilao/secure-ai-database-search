@@ -6,7 +6,7 @@ is controlled on the hibernate session level so the users can only access the da
 
 The application uses OpenAI Assistants API to translate queries into HQL.
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/spring-projects/spring-petclinic) [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=7517918)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/cernobilao/secure-ai-database-search) [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=7517918)
 
 ## Understanding the Spring Petclinic application with a few diagrams
 
@@ -23,8 +23,8 @@ using [Maven](https://spring.io/guides/gs/maven/) or [Gradle](https://spring.io/
 file and run it from the command line (it should work just as well with Java 17 or newer):
 
 ```bash
-git clone https://github.com/spring-projects/spring-petclinic.git
-cd spring-petclinic
+git clone https://github.com/cernobilao/secure-ai-database-search.git
+cd secure-ai-database
 ./mvnw package
 java -jar target/*.jar
 ```
@@ -133,7 +133,7 @@ The following items should be installed in your system:
 1. On the command line run:
 
     ```bash
-    git clone https://github.com/spring-projects/spring-petclinic.git
+    git clone https://github.com/cernobilao/secure-ai-database-search.git
     ```
 
 1. Inside Eclipse or STS:
