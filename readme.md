@@ -6,7 +6,7 @@ is controlled on the hibernate session level so the users can only access the da
 
 The application uses OpenAI Assistants API to translate queries into HQL.
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/cernobilao/secure-ai-database-search) [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=7517918)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/cernobilao/secure-ai-database-search)
 
 ## Understanding the Spring Petclinic application with a few diagrams
 
