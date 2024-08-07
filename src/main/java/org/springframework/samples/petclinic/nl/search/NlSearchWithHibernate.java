@@ -20,7 +20,7 @@ public class NlSearchWithHibernate {
 		String hqlFromAssistant = null;
 		try {
 			nlSearch.getConversationHistory().add(nlSearch.getUserQuery());
-			if (nlSearch.getThreadId() == null) {
+			if (nlSearch.getThreadId() == null && OpenAiAssistant.isOk()) {
 				String threadId = aiAssistant.createThread();
 				nlSearch.setThreadId(threadId);
 			}
