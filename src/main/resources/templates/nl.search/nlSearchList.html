@@ -8,9 +8,9 @@
 <form th:object="${nlSearch}" th:action="@{/nl-search}" method="get"
       class="form-horizontal" id="nl-search-form">
   <div class="chat-window" id="chatWindow">
-    <th:block th:each="line, iterStat : ${nlSearch.conversationHistory}">
+    <th:block th:each="message, iterStat : ${nlSearch.conversationHistory}">
       <div th:class="${iterStat.odd} ? 'chat-message user-message' : 'chat-message ai-message'">
-        [[${line}]]
+        [[${message}]]
       </div>
     </th:block>
   </div>
