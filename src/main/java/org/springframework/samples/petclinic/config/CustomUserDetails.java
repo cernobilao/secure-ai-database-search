@@ -28,8 +28,8 @@ public class CustomUserDetails implements UserDetails {
 		return userDetails.getUsername();
 	}
 
-	public String getId() {
-		return "1";
+	public Integer getId() {
+		return 1;
 	}
 
 }

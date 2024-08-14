@@ -4,14 +4,14 @@ import org.hibernate.Session;
 import org.hibernate.query.SelectionQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.nl.search.exception.AiAssistantConnectionException;
-import org.springframework.samples.petclinic.nl.search.session.OnTheFlySecureSessionBuilder;
+import org.springframework.samples.petclinic.nl.search.session.SecureSessionBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NlSearchWithHibernate {
 
 	@Autowired
-	private OnTheFlySecureSessionBuilder onTheFlySecureSessionBuilder;
+	private SecureSessionBuilder onTheFlySecureSessionBuilder;
 
 	@Autowired
 	AiAssistant aiAssistant;

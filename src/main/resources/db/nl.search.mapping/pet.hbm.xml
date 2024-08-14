@@ -1,6 +1,9 @@
 <hibernate-mapping>
-	<class name="org.springframework.samples.petclinic.owner.Pet" table="pets"
-		subselect="SELECT * FROM pets WHERE owner_id = '{{ownerId}}'">
+	<filter-def name="ownerFilter">
+		<filter-param name="ownerId" type="integer"/>
+	</filter-def>
+	<class name="org.springframework.samples.petclinic.owner.Pet" table="pets">
+
 		<id name="id" type="java.lang.Long">
 			<column name="id"/>
 			<generator class="native"/>
@@ -25,5 +28,6 @@
 			</key>
 			<one-to-many class="org.springframework.samples.petclinic.owner.Visit" />
 		</set>
+		<filter name="ownerFilter" condition="owner_id = :ownerId"/>
 	</class>
 </hibernate-mapping>

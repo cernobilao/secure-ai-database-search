@@ -7,31 +7,41 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.springframework.samples.petclinic.config.CustomUserDetails;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.PetType;
 import org.springframework.samples.petclinic.owner.Visit;
 
-class ResrictedUser extends MappingConfigurationBuilder {
+import jakarta.persistence.EntityManager;
+
+class ResrictedUser extends SessionByUserBuilder {
 
 	ResrictedUser(CustomUserDetails principal) {
 		this.principal = principal;
 	}
 
-	private CustomUserDetails principal;
+	private final CustomUserDetails principal;
 
 	private static final String PET_ORM_MAPPING_XML = readOrmMappingXml("db/nl.search.mapping/pet.hbm.xml");
 
 	@Override
-	public Configuration build() {
-		String petMapping = PET_ORM_MAPPING_XML.replace("{{ownerId}}", String.valueOf(principal.getId()));
-		InputStream petMappingInputStream = new ByteArrayInputStream(petMapping.getBytes(StandardCharsets.UTF_8));
+	public Session build(EntityManager entityManager) {
+		InputStream petMappingInputStream = new ByteArrayInputStream(
+				PET_ORM_MAPPING_XML.getBytes(StandardCharsets.UTF_8));
 		Configuration configuration = new Configuration().addInputStream(petMappingInputStream)
 			.addAnnotatedClass(Visit.class)
 			.addAnnotatedClass(PetType.class)
 			.addAnnotatedClass(Owner.class);
-		return configuration;
+
+		configuration.setProperties(getPropertiesUsingCurrentEntityManager(entityManager));
+
+		SessionFactory customSessionFactory = configuration.buildSessionFactory();
+		Session session = customSessionFactory.openSession();
+		session.enableFilter("ownerFilter").setParameter("ownerId", principal.getId());
+		return session;
 	}
 
 	private static String readOrmMappingXml(String fileName) {
