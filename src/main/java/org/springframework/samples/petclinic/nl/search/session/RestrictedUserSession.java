@@ -1,4 +1,6 @@
-package org.springframework.samples.petclinic.nl.search.session.orm.mapping;
+package org.springframework.samples.petclinic.nl.search.session;
+
+import static org.springframework.samples.petclinic.nl.search.session.SessionUtil.getPropertiesUsingCurrentEntityManager;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -12,23 +14,21 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.springframework.samples.petclinic.config.CustomUserDetails;
 import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.samples.petclinic.owner.Pet;
 import org.springframework.samples.petclinic.owner.PetType;
 import org.springframework.samples.petclinic.owner.Visit;
+import org.springframework.stereotype.Component;
 
 import jakarta.persistence.EntityManager;
 
-class ResrictedUser extends SessionByUserBuilder {
-
-	ResrictedUser(CustomUserDetails principal) {
-		this.principal = principal;
-	}
-
-	private final CustomUserDetails principal;
+@Component
+class RestrictedUserSession {
 
 	private static final String PET_ORM_MAPPING_XML = readOrmMappingXml("db/nl.search.mapping/pet.hbm.xml");
 
-	@Override
-	public Session build(EntityManager entityManager) {
+	private final SessionFactory sessionFactory;
+
+	RestrictedUserSession(EntityManager entityManager) {
 		InputStream petMappingInputStream = new ByteArrayInputStream(
 				PET_ORM_MAPPING_XML.getBytes(StandardCharsets.UTF_8));
 		Configuration configuration = new Configuration().addInputStream(petMappingInputStream)
@@ -38,14 +38,17 @@ class ResrictedUser extends SessionByUserBuilder {
 
 		configuration.setProperties(getPropertiesUsingCurrentEntityManager(entityManager));
 
-		SessionFactory customSessionFactory = configuration.buildSessionFactory();
-		Session session = customSessionFactory.openSession();
+		this.sessionFactory = configuration.buildSessionFactory();
+	}
+
+	Session open(CustomUserDetails principal) {
+		Session session = this.sessionFactory.openSession();
 		session.enableFilter("ownerFilter").setParameter("ownerId", principal.getId());
 		return session;
 	}
 
 	private static String readOrmMappingXml(String fileName) {
-		try (InputStream inputStream = ResrictedUser.class.getClassLoader().getResourceAsStream(fileName)) {
+		try (InputStream inputStream = RestrictedUserSession.class.getClassLoader().getResourceAsStream(fileName)) {
 			if (inputStream == null) {
 				throw new RuntimeException("Resource file not found: " + fileName);
 			}
