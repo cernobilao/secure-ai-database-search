@@ -37,22 +37,35 @@
   </div>
 
 </form>
-<textarea class="ai-response-hql" readonly rows="1" th:text="${nlSearch.aiResponse}"></textarea>
-<div th:if="${nlSearch.errorMessage}" style="color: red;">
+<div th:if="${#strings.toLowerCase(nlSearch.aiResponse).startsWith('select ')}">
+  <textarea
+    class="ai-response-hql"
+    readonly
+    rows="1"
+    th:text="${nlSearch.aiResponse}"
+    >
+</textarea>
+  <div th:if="${nlSearch.errorMessage}" style="color: red;">
   <strong>Error: [[${nlSearch.errorMessage}]]</strong>
 </div>
-<table id="nlSearchResult" class="table table-striped" th:unless="${nlSearch.errorMessage}">
-  <thead>
-  <tr>
-    <th th:each="columnName : ${nlSearch.columnNames}" th:text="${columnName}"/>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="result : ${nlSearch.searchResult}">
-    <td th:each="item : ${result}" th:text="${item}"/>
-  </tr>
-  </tbody>
-</table>
+  <table id="nlSearchResult" class="table table-striped" th:unless="${nlSearch.errorMessage}">
+    <thead>
+    <tr>
+      <th th:each="columnName : ${nlSearch.columnNames}" th:text="${columnName}"/>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="result : ${nlSearch.searchResult}">
+      <td th:each="item : ${result}" th:text="${item}"/>
+    </tr>
+    </tbody>
+  </table>
+
+</div>
+
+
+
+
 <script>
   // Ask to fix the error button
   document.getElementById('askToFixBtn').addEventListener('click', function(e) {

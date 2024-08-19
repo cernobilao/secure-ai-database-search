@@ -41,14 +41,17 @@ public class NlSearchWithHibernate {
 		nlSearch.getConversationHistory().add(hqlFromAssistant);
 		nlSearch.setAiResponse(hqlFromAssistant);
 
-		try {
-			Session session = secureSession.getOpenSession();
-			SelectionQuery<Object[]> selectionQuery = session.createSelectionQuery(hqlFromAssistant, Object[].class);
-			nlSearch.setSearchResult(selectionQuery.getResultList());
-			session.close();
-		}
-		catch (Exception e) {
-			nlSearch.setErrorMessage(e.getMessage());
+		if (hqlFromAssistant != null && hqlFromAssistant.trim().toLowerCase().startsWith("select ")) {
+			try {
+				Session session = secureSession.getOpenSession();
+				SelectionQuery<Object[]> selectionQuery = session.createSelectionQuery(hqlFromAssistant,
+						Object[].class);
+				nlSearch.setSearchResult(selectionQuery.getResultList());
+				session.close();
+			}
+			catch (Exception e) {
+				nlSearch.setErrorMessage(e.getMessage());
+			}
 		}
 
 		return nlSearch;
