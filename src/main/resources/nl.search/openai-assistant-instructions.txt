@@ -80,3 +80,7 @@ public class Vet extends Person {
 			inverseJoinColumns = @JoinColumn(name = "specialty_id"))
 	private Set<Specialty> specialties;
 }
+
+Example:
+User Query: Find all the owners with their pets and their visits.
+Your Response: SELECT o.id, o.address, o.city, o.telephone, p.id, p.name, p.birthDate, v.id, v.date, v.description FROM Owner o JOIN o.pets p JOIN p.visits v
