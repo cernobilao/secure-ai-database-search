@@ -37,7 +37,7 @@
   </div>
 
 </form>
-<div th:if="${#strings.toLowerCase(nlSearch.aiResponse).startsWith('select ')}">
+<div th:if="${nlSearch.aiResponse != null and #strings.toLowerCase(nlSearch.aiResponse).startsWith('select ')}">
   <textarea
     class="ai-response-hql"
     readonly
