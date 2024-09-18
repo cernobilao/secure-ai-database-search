@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.nl.search.openaiclient;
 
 import static org.springframework.samples.petclinic.nl.search.openaiclient.model.GPTModel.GPT3_5_TURBO;
+import static org.springframework.samples.petclinic.nl.search.openaiclient.model.GPTModel.GPT_4O;
 import static org.springframework.samples.petclinic.nl.search.openaiclient.model.GPTModel.GPT_4O_MINI;
 
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class AssistantAIClient {
 	}
 
 	public AssistantResponseDTO createAssistant(String name, String initialPrompt) throws Exception {
-		AssistantRequestDTO dto = new AssistantRequestDTO(name, GPT_4O_MINI.getName(), initialPrompt);
+		AssistantRequestDTO dto = new AssistantRequestDTO(name, GPT_4O.getName(), initialPrompt);
 		String response = post(assistantsUrl, dto);
 		return objectMapper.readValue(response, AssistantResponseDTO.class);
 	}
