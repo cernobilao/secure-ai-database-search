@@ -24,13 +24,16 @@ public class NlSearchController {
 	@Autowired
 	private NlSearchWithHibernate nlSearchWithHibernate;
 
+	@Autowired
+	private AiAssistant aiAssistant;
+
 	@ModelAttribute("nlSearch")
 	public NlSearch addModel(NlSearch nlSearch) {
 		if (nlSearch == null) {
 			nlSearch = new NlSearch();
 		}
-		Boolean openAiAssistantIsOk = OpenAiAssistant.isOk();
-		if (!openAiAssistantIsOk) {
+		Boolean aiAssistantIsOk = aiAssistant.isOk();
+		if (!aiAssistantIsOk) {
 			nlSearch.setAssistantInfoMessage(
 					"OpenAI assistant is not available. Make sure the Open API key is configured. You can test only the "
 							+ "authorized access to pets.");

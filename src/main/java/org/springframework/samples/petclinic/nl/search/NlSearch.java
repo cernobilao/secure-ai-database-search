@@ -19,7 +19,7 @@ public class NlSearch {
 
 	String errorMessage;
 
-	String threadId;
+	String conversationId;
 
 	List<String> conversationHistory = new ArrayList<>();
 
@@ -79,12 +79,12 @@ public class NlSearch {
 		this.loggedInUserInfoMessage = loggedInUserInfoMessage;
 	}
 
-	public String getThreadId() {
-		return threadId;
+	public String getConversationId() {
+		return conversationId;
 	}
 
-	public void setThreadId(String threadId) {
-		this.threadId = threadId;
+	public void setConversationId(String conversationId) {
+		this.conversationId = conversationId;
 	}
 
 	public List<String> getConversationHistory() {

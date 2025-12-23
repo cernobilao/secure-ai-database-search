@@ -1,91 +1,80 @@
 package org.springframework.samples.petclinic.nl.search;
 
-import static java.lang.Thread.sleep;
-
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
-
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.models.conversations.Conversation;
+import com.openai.models.conversations.ConversationCreateParams;
+import com.openai.models.responses.Response;
+import com.openai.models.responses.ResponseCreateParams;
+import com.openai.models.responses.ResponseInputItem;
+import com.openai.models.responses.ResponseInputText;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.samples.petclinic.nl.search.exception.AiAssistantConnectionException;
-import org.springframework.samples.petclinic.nl.search.openaiclient.AssistantAIClient;
-import org.springframework.samples.petclinic.nl.search.openaiclient.dto.AssistantResponseDTO;
-import org.springframework.samples.petclinic.nl.search.openaiclient.dto.MessageResponseDTO;
-import org.springframework.samples.petclinic.nl.search.openaiclient.dto.MessagesListResponseDTO;
-import org.springframework.samples.petclinic.nl.search.openaiclient.dto.RunResponseDTO;
-import org.springframework.samples.petclinic.nl.search.openaiclient.dto.ThreadResponseDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class OpenAiAssistant implements AiAssistant {
 
-	public static final String ASSISTANT_NAME = "User Query to HQL Translator";
+	private final OpenAIClient client;
+
+	private final String instructions;
+
+	private static Boolean isOk;
 
 	private static Logger logger = LoggerFactory.getLogger(OpenAiAssistant.class);
 
-	private static String assistantId;
+	public OpenAiAssistant(@Value("${openai.api.key}") String apiKey) {
 
-	long DELAY = 3;
+		ClassPathResource resource = new ClassPathResource("nl.search/openai-assistant-instructions.txt");
+		try {
+			instructions = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
-	private AssistantAIClient client;
+		this.client = OpenAIOkHttpClient.builder().apiKey(apiKey).build();
 
-	public OpenAiAssistant(@Value("${openai.api.key}") String apiKey,
-			@Value("${openai.assistants.url}") String assistantsUrl,
-			@Value("${openai.threads.url}") String threadsUrl) {
-
-		Properties properties = new Properties();
-		properties.setProperty("openai.api.key", apiKey);
-		properties.setProperty("openai.assistants.url", assistantsUrl);
-		properties.setProperty("openai.threads.url", threadsUrl);
-		this.client = new AssistantAIClient(properties);
-		String assistantId = createAssistantIfDoesNotExist();
-		this.assistantId = assistantId;
+		isOk = testConnectionIsOk();
 	}
 
-	public static Boolean isOk() {
-		if (assistantId == null || assistantId.isEmpty()) {
+	public Boolean isOk() {
+		return isOk;
+	}
+
+	private Boolean testConnectionIsOk() {
+		try {
+			Response response = this.client.responses()
+				.create(ResponseCreateParams.builder()
+					.model("gpt-4.1-mini") // small + cheap + widely available
+					.input("Say OK")
+					.build());
+
+			String output = response.toString();
+			logger.info("API connection successful! Assistant says: " + output);
+
+		}
+		catch (Exception e) {
+			logger.warn("API connection failed ❌");
+			e.printStackTrace();
 			return false;
 		}
 		return true;
 	}
 
-	private String createAssistantIfDoesNotExist() {
-		try {
-			Optional<AssistantResponseDTO> existingAssistant = client.listAssistants()
-				.stream()
-				.filter(assistant -> ASSISTANT_NAME.equals(assistant.name()))
-				.findFirst();
-			if (existingAssistant.isPresent()) {
-				logger.info("Found existing assistant with id " + assistantId);
-				return existingAssistant.get().id();
-			}
-			else {
-				ClassPathResource resource = new ClassPathResource("nl.search/openai-assistant-instructions.txt");
-				String instructions = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
-				AssistantResponseDTO assistantResponseDTO = client.createAssistant(ASSISTANT_NAME, instructions);
-				logger.info("Created new assistant with id " + assistantId);
-				return assistantResponseDTO.id();
-			}
-		}
-		catch (Exception e) {
-			logger.warn(
-					"Failed to create Open AI Assistant. Make sure that the API key is set in application.properties.",
-					e);
-			return null;
-		}
-	}
-
 	@Override
-	public String getHql(String userInput, String threadId) throws Exception {
-		if (threadId == null || threadId.isEmpty()) {
+	public String getHql(String userInput, String conversationId) throws Exception {
+		if (conversationId == null || conversationId.isEmpty()) {
 			return getHql(userInput);
 		}
-		return getNewHqlFromConversationThread(userInput, threadId);
+		return getNewHqlFromConversation(userInput, conversationId);
 	}
 
 	@Override
@@ -94,82 +83,36 @@ public class OpenAiAssistant implements AiAssistant {
 			logger.info("OpenAI Assistant is available.");
 			return "SELECT p.name, p.birthDate, p.type FROM Pet p";
 		}
-		ThreadResponseDTO thread = client.createThread();
-		if (thread.id() == null) {
-			logger.error("Failed to create thread");
-			throw new AiAssistantConnectionException("Failed to create thread");
+		String conversationId = createConversation();
+		if (conversationId == null) {
+			logger.error("Failed to create conversation");
+			throw new AiAssistantConnectionException("Failed to create conversation");
 		}
-		return getNewHqlFromConversationThread(userInput, thread.id());
+		return getNewHqlFromConversation(userInput, conversationId);
 	}
 
 	@Override
-	public String createThread() throws Exception {
-		ThreadResponseDTO thread = client.createThread();
-		if (thread.id() == null) {
-			logger.error("Failed to create thread");
-			throw new AiAssistantConnectionException("Failed to create thread");
-		}
-		return thread.id();
+	public String createConversation() throws Exception {
+		Conversation conversation = client.conversations()
+			.create(ConversationCreateParams.builder()
+				.addItem(ResponseInputItem.Message.builder()
+					.addContent(ResponseInputText.builder().text(instructions).build())
+					.role(ResponseInputItem.Message.Role.SYSTEM)
+					.build())
+				.build());
+		return conversation.id();
 	}
 
-	private String getNewHqlFromConversationThread(String userInput, String threadId) throws Exception {
-		client.sendMessage(threadId, "user", userInput);
-		RunResponseDTO run = client.runMessage(threadId, assistantId);
+	private String getNewHqlFromConversation(String userInput, String conversationId) throws Exception {
+		Response response = client.responses()
+			.create(ResponseCreateParams.builder()
+				.conversation(conversationId)
+				.input(userInput)
+				.model("gpt-4o")
+				.build());
 
-		waitUntilRunIsFinished(client, threadId, run, DELAY);
-
-		MessagesListResponseDTO allResponses = client.getMessages(threadId);
-		logger.info("These are all the messages and you will be billed by OpenAI for every single one of them:");
-		log(allResponses);
-		MessageResponseDTO assistantMessage = allResponses.data()
-			.stream()
-			.filter(message -> "assistant".equals(message.role()))
-			.findFirst()
-			.get();
-		return assistantMessage.content().get(0).text().value();
-	}
-
-	private static void waitUntilRunIsFinished(AssistantAIClient client, String threadId, RunResponseDTO run,
-			long DELAY) throws InterruptedException {
-		while (!isRunDone(client, threadId, run.id())) {
-			superviseWorkInProgress(client, threadId);
-			sleep(DELAY * 1000);
-		}
-	}
-
-	private static void superviseWorkInProgress(AssistantAIClient client, String threadId) {
-		try {
-			logger.info("Checking messages to supervise assistant's work");
-			MessagesListResponseDTO messages = client.getMessages(threadId);
-			log(messages);
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private static void log(MessagesListResponseDTO messages) {
-		messages.data().forEach(message -> logger.info(message.toString()));
-	}
-
-	private static boolean isRunDone(AssistantAIClient client, String threadId, String runId) {
-		RunResponseDTO status;
-		try {
-			status = client.getRunStatus(threadId, runId);
-			logger.info("Status of your run is currently " + status);
-			return isRunStateFinal(status);
-		}
-		catch (Exception e) {
-			logger.error("Failed to get run state, will retry...", e);
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	private static boolean isRunStateFinal(RunResponseDTO runResponseDTO) {
-		List<String> finalStates = List.of("cancelled", "failed", "completed", "expired");
-		String runStatus = Optional.of(runResponseDTO).map(RunResponseDTO::status).orElse("unknown").toLowerCase();
-		return finalStates.contains(runStatus);
+		String output = response.output().get(0).message().get().content().get(0).asOutputText().text();
+		return output;
 	}
 
 }
